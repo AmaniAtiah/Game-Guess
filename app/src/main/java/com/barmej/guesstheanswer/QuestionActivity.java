@@ -29,6 +29,7 @@ public class QuestionActivity extends AppCompatActivity {
     private TextView mTextViewQuestion;
     private String[] QUESTIONS;
     Menu mmenuChangeLang;
+    private int number = 1;
     private static final boolean[] ANSWERS = {
             false,
             true,
