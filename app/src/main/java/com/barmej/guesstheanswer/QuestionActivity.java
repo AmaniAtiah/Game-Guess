@@ -4,10 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,11 +20,15 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Locale;
 import java.util.Random;
 
 public class QuestionActivity extends AppCompatActivity {
+    private static final String TAG = QuestionActivity.class.getSimpleName();
+    private static final String BUNDLE_CURRENT_INDEX = "BUNDLE_CURRENT_INDEX";
     private TextView mTextViewQuestion;
     private String[] QUESTIONS;
+    Menu mmenuChangeLang;
     private static final boolean[] ANSWERS = {
             false,
             true,
@@ -52,18 +61,28 @@ public class QuestionActivity extends AppCompatActivity {
         if(!appLang.equals(""))
             LocaleHelper.setLocale(this,appLang);
 
+
         setContentView(R.layout.activity_main);
+
+        mmenuChangeLang = findViewById(R.id.menuChangeLang);
         mTextViewQuestion = findViewById(R.id.text_view_question);
         QUESTIONS = getResources().getStringArray(R.array.questions);
         ANSWERS_DETAILS = getResources().getStringArray(R.array.answers_details);
         showNewQuestion();
+
+
+
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu,menu);
+
         return true;
+
 
     }
 
@@ -71,9 +90,14 @@ public class QuestionActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if(item.getItemId() == R.id.menuChangeLang) {
             showLanguageDialog();
+
             return true;
+
+
         } else {
+
             return super.onOptionsItemSelected(item);
+
         }
     }
 
@@ -87,6 +111,8 @@ public class QuestionActivity extends AppCompatActivity {
                         switch (which) {
                             case 0:
                                 language = "ar";
+
+
                                 break;
                             case 1:
                                 language = "en";
@@ -100,7 +126,8 @@ public class QuestionActivity extends AppCompatActivity {
                         Intent intent = new Intent(getApplicationContext(), QuestionActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
+
+                        //reload();
 
 
                     }
@@ -108,11 +135,29 @@ public class QuestionActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    private void reload() {
+        if (Build.VERSION.SDK_INT >= 11) {
+            recreate();
+        } else {
+            Intent intent = getIntent();
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            finish();
+            overridePendingTransition(0, 0);
+
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+
+        }
+    }
+
+
     private void saveLanguage(String lang) {
         SharedPreferences sharedPreferences = getSharedPreferences(Constants.APP_PREF ,MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Constants.APP_LANG,lang);
+
         editor.apply();
+
 
     }
 
@@ -122,11 +167,15 @@ public class QuestionActivity extends AppCompatActivity {
         mCurrentQuestion = QUESTIONS[randomQuestionIndex];
         mCurrentAnswer = ANSWERS[randomQuestionIndex];
         mCurrentAnswerDetail = ANSWERS_DETAILS[randomQuestionIndex];
-        mTextViewQuestion.setText(mCurrentQuestion);
+        showQuestion();
 
     }
     public void onChangeQuestionClicked(View view) {
         showNewQuestion();
+    }
+
+    private void showQuestion() {
+        mTextViewQuestion.setText(mCurrentQuestion);
     }
 
 
@@ -159,8 +208,31 @@ public class QuestionActivity extends AppCompatActivity {
     public void onShareQuestionClicked(View view) {
         Intent intent = new Intent(QuestionActivity.this,ShareActivity.class);
         intent.putExtra(Constants.QUESTION_TEXT_EXTRA,mCurrentQuestion);
+
         startActivity(intent);
 
     }
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState != null) {
+
+                Log.d(TAG, "display =" + mCurrentQuestion);
+                mCurrentQuestion = savedInstanceState.getString("image");
+                showQuestion();
+
+        }
+        Log.i(TAG,"onRestoreInstanceState");
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("image", mCurrentQuestion);
+
+        Log.i(TAG,"onSaveInstanceState");
+    }
+
+
 }
 
