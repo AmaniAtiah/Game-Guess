@@ -30,6 +30,7 @@ public class QuestionActivity extends AppCompatActivity {
     private String[] QUESTIONS;
     Menu mmenuChangeLang;
     private int number = 1;
+    private int number1 = 2;
     private static final boolean[] ANSWERS = {
             false,
             true,
