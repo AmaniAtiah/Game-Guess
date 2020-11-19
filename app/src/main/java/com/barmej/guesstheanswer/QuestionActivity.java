@@ -34,6 +34,7 @@ public class QuestionActivity extends AppCompatActivity {
     private int number3 = 3;
     private int number4 = 4;
     private int number5 = 5;
+    private int number6 = 6;
     private static final boolean[] ANSWERS = {
             false,
             true,
